@@ -1,0 +1,246 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Roboto+Condensed:wght@700&display=swap');
+
+@layer base {
+  :root {
+    /* Biosolve Theme - Light Mode */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 23%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 23%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 23%;
+
+    /* Biosolve Dark Gray - for header */
+    --primary: 0 0% 25%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Light Gray */
+    --secondary: 0 0% 95%;
+    --secondary-foreground: 0 0% 23%;
+
+    /* Muted Gray */
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    /* Biosolve Orange Accent */
+    --accent: 28 80% 54%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 28 80% 54%;
+
+    --radius: 0.75rem;
+
+    /* Custom Colors */
+    --success: 142 70% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --info: 200 80% 50%;
+    --info-foreground: 0 0% 100%;
+
+    /* Biosolve Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(28 80% 54%) 0%, hsl(35 85% 58%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(28 80% 54%) 0%, hsl(35 85% 58%) 100%);
+    --gradient-steel: linear-gradient(180deg, hsl(0 0% 98%) 0%, hsl(0 0% 94%) 100%);
+    --gradient-dark: linear-gradient(135deg, hsl(0 0% 23%) 0%, hsl(0 0% 30%) 100%);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 23% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 23% / 0.1), 0 2px 4px -2px hsl(0 0% 23% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 23% / 0.1), 0 4px 6px -4px hsl(0 0% 23% / 0.1);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 23% / 0.1), 0 8px 10px -6px hsl(0 0% 23% / 0.1);
+    --shadow-glow: 0 0 20px hsl(28 80% 54% / 0.3);
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 26%;
+    --sidebar-primary: 0 0% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 0 0% 96%;
+    --sidebar-accent-foreground: 0 0% 10%;
+    --sidebar-border: 0 0% 91%;
+    --sidebar-ring: 28 80% 54%;
+  }
+
+  .dark {
+    --background: 0 0% 12%;
+    --foreground: 0 0% 95%;
+
+    --card: 0 0% 15%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 0 0% 15%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 28 80% 54%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 95%;
+
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 60%;
+
+    --accent: 28 80% 54%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 22%;
+    --input: 0 0% 22%;
+    --ring: 28 80% 54%;
+
+    --sidebar-background: 0 0% 10%;
+    --sidebar-foreground: 0 0% 96%;
+    --sidebar-primary: 28 80% 54%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 16%;
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 0 0% 16%;
+    --sidebar-ring: 28 80% 54%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Roboto', system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Roboto Condensed', 'Roboto', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-card/80 backdrop-blur-sm border border-border/50 rounded-xl;
+    box-shadow: var(--shadow-md);
+  }
+
+  .industrial-gradient {
+    background: var(--gradient-primary);
+  }
+
+  .accent-gradient {
+    background: var(--gradient-accent);
+  }
+
+  .steel-gradient {
+    background: var(--gradient-steel);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { 
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to { 
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from { 
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to { 
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
+
+/* Safe area for mobile devices */
+.safe-area-bottom {
+  padding-bottom: 1rem;
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .safe-area-bottom {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 0.75rem);
+  }
+}
+
+.safe-area-top {
+  padding-top: 0;
+}
+
+@supports (padding-top: env(safe-area-inset-top)) {
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+/* Main content padding for bottom nav */
+.main-content-with-nav {
+  padding-bottom: 5rem;
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .main-content-with-nav {
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
