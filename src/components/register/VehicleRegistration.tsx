@@ -474,11 +474,11 @@ export function VehicleRegistration({ projects, onAddVehicle, checkVinExists, ch
                   </div>
                   
                   {dealerSheetPhoto ? (
-                    <div className="relative">
+                    <div className="relative aspect-video rounded-lg overflow-hidden bg-muted border border-border">
                       <img 
                         src={dealerSheetPhoto} 
                         alt="Ficha de concesionario" 
-                        className="w-full h-48 object-contain bg-black rounded-lg border border-border"
+                        className="w-full h-full object-contain bg-black"
                       />
                       <Button
                         variant="destructive"
