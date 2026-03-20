@@ -380,7 +380,7 @@ export function VehicleDetailModal({ vehicle, project, progress, viewMode, deliv
                     </h3>
                     <div className="grid grid-cols-1 gap-4">
                       {vehicle.photos.map((photo, idx) => (
-                        <div key={idx} className="aspect-video rounded-lg overflow-hidden bg-muted">
+                        <div key={idx} className="aspect-video rounded-lg overflow-hidden bg-muted border border-border">
                           <img 
                             src={photo} 
                             alt={`Foto ${idx + 1}`} 
@@ -394,6 +394,23 @@ export function VehicleDetailModal({ vehicle, project, progress, viewMode, deliv
                   <div className="text-center py-12">
                     <Image className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
                     <p className="text-muted-foreground">No hay fotos de recepción</p>
+                  </div>
+                )}
+
+                {/* Foto de Ficha de Concesionario */}
+                {vehicle.dealerSheetPhoto && (
+                  <div className="space-y-4 mt-8 pt-8 border-t border-border">
+                    <h3 className="font-display font-bold flex items-center gap-2">
+                      <Image className="w-4 h-4" />
+                      Ficha de Concesionario
+                    </h3>
+                    <div className="aspect-video rounded-lg overflow-hidden bg-muted border border-border">
+                      <img 
+                        src={vehicle.dealerSheetPhoto} 
+                        alt="Ficha de Concesionario" 
+                        className="w-full h-full object-contain bg-black"
+                      />
+                    </div>
                   </div>
                 )}
               </>
