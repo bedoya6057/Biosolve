@@ -1,10 +1,8 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Roboto+Condensed:wght@700&display=swap');
 
-@layer base {
+@tailwind base;
+@tailwind components;
+@tailwind utilities;@layer base {
   :root {
     /* Biosolve Theme - Light Mode */
     --background: 0 0% 98%;

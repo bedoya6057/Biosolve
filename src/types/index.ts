@@ -63,4 +63,4 @@ export interface EquipmentInstallation {
   notes?: string;
 }
 
-export type TabType = 'admin' | 'users' | 'register' | 'equipment' | 'delivery' | 'extra' | 'audit';
+export type TabType = 'dashboard' | 'admin' | 'users' | 'register' | 'equipment' | 'delivery' | 'extra' | 'audit';

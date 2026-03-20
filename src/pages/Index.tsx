@@ -1,6 +1,7 @@
 import { Header } from "@/components/layout/Header";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { AdminPanel } from "@/components/admin/AdminPanel";
+import { DashboardPanel } from "@/components/admin/DashboardPanel";
 import { UserManagement } from "@/components/admin/UserManagement";
 import { VehicleRegistration } from "@/components/register/VehicleRegistration";
 import { VehicleDelivery } from "@/components/register/VehicleDelivery";
@@ -23,7 +24,7 @@ const Index = () => {
   
   // Set default tab based on user role
   const getDefaultTab = useCallback((): TabType => {
-    if (isAdmin) return 'admin';
+    if (isAdmin) return 'dashboard';
     if (isRegistrador) return 'register';
     if (isTecnico) return 'equipment';
     if (isAuditor) return 'audit';
@@ -157,6 +158,7 @@ const Index = () => {
 
   const headerInfo = useMemo(() => {
     switch (activeTab) {
+      case 'dashboard': return { subtitle: 'Dashboard de Gestión' };
       case 'admin': return { subtitle: 'Panel de Administración' };
       case 'users': return { subtitle: 'Gestión de Usuarios' };
       case 'register': return { subtitle: 'Registro de Vehículos' };
@@ -201,6 +203,17 @@ const Index = () => {
       <Header subtitle={headerInfo.subtitle} />
 
       <main className="flex-1 flex flex-col overflow-auto main-content-with-nav">
+        {activeTab === 'dashboard' && isAdmin && (
+          <DashboardPanel
+            companies={companies}
+            projects={projects}
+            vehicles={vehicles}
+            installations={installations}
+            vehiculosEntregados={vehiculosEntregados}
+            getVehicleProgress={getVehicleProgress}
+          />
+        )}
+
         {activeTab === 'admin' && isAdmin && (
           <AdminPanel
             companies={companies}

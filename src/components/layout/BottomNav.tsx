@@ -1,4 +1,4 @@
-import { Settings, Car, Wrench, Users, Send, MoreHorizontal, ClipboardCheck } from "lucide-react";
+import { Settings, Car, Wrench, Users, Send, MoreHorizontal, ClipboardCheck, BarChart3 } from "lucide-react";
 import { TabType } from "@/types";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,6 +9,7 @@ interface BottomNavProps {
 }
 
 const allTabs: { id: TabType; label: string; icon: React.ElementType; roles: ('admin' | 'registrador' | 'tecnico' | 'auditor')[] }[] = [
+  { id: "dashboard", label: "Dashboard", icon: BarChart3, roles: ['admin'] },
   { id: "admin", label: "Admin", icon: Settings, roles: ['admin'] },
   { id: "users", label: "Usuarios", icon: Users, roles: ['admin'] },
   { id: "register", label: "Registro", icon: Car, roles: ['admin', 'registrador', 'tecnico', 'auditor'] },
