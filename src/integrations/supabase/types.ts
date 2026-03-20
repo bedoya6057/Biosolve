@@ -244,7 +244,10 @@ export type Database = {
           km_entry: string
           model: string
           observations: string | null
-          photos: string[]
+          foto_1: string | null
+          foto_2: string | null
+          foto_3: string | null
+          foto_4: string | null
           plate: string | null
           project_id: string
           status: string
@@ -266,7 +269,10 @@ export type Database = {
           km_entry: string
           model: string
           observations?: string | null
-          photos?: string[]
+          foto_1?: string | null
+          foto_2?: string | null
+          foto_3?: string | null
+          foto_4?: string | null
           plate?: string | null
           project_id: string
           status?: string
@@ -288,7 +294,10 @@ export type Database = {
           km_entry?: string
           model?: string
           observations?: string | null
-          photos?: string[]
+          foto_1?: string | null
+          foto_2?: string | null
+          foto_3?: string | null
+          foto_4?: string | null
           plate?: string | null
           project_id?: string
           status?: string
@@ -313,7 +322,10 @@ export type Database = {
           id: string
           km_exit: string
           notes: string | null
-          photos: string[]
+          foto_1: string | null
+          foto_2: string | null
+          foto_3: string | null
+          foto_4: string | null
           project_id: string
           receiver_name: string
           receiver_position: string
@@ -328,7 +340,10 @@ export type Database = {
           id?: string
           km_exit: string
           notes?: string | null
-          photos?: string[]
+          foto_1?: string | null
+          foto_2?: string | null
+          foto_3?: string | null
+          foto_4?: string | null
           project_id: string
           receiver_name: string
           receiver_position: string
@@ -343,7 +358,10 @@ export type Database = {
           id?: string
           km_exit?: string
           notes?: string | null
-          photos?: string[]
+          foto_1?: string | null
+          foto_2?: string | null
+          foto_3?: string | null
+          foto_4?: string | null
           project_id?: string
           receiver_name?: string
           receiver_position?: string

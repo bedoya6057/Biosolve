@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { offlineStorage, PendingOperation } from '@/services/offlineStorage';
 import { supabase } from '@/integrations/supabase/client';
+import type { VehiculoDB, InstalacionDB, VehiculoEntregadoDB, EmpresaDB, ProyectoDB } from '@/hooks/useProjectsDB';
+import { uploadBase64ToStorage } from '@/hooks/useProjectsDB';
 import { useAuth } from './AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { logService } from '@/services/logService';
@@ -229,8 +231,29 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
       case 'vehicle':
         if (op.action === 'create') {
           // If the record was created offline, we expect a stable id so subsequent operations can reference it.
-          const { __equipment_ids, ...vehicleData } = op.data ?? {};
+          const { __equipment_ids, _offline_base64_photos, _offline_base64_dealer, ...vehicleData } = op.data ?? {};
           const equipmentIds: string[] = Array.isArray(__equipment_ids) ? __equipment_ids : [];
+
+          // Upload offline photos to Supabase Storage
+          if (_offline_base64_photos && Array.isArray(_offline_base64_photos)) {
+            const uploadedPhotos = [];
+            for (const photo of _offline_base64_photos) {
+               if (photo && photo.startsWith('data:image')) {
+                 const url = await uploadBase64ToStorage(photo, `vehiculos/${vehicleData.vin}`);
+                 uploadedPhotos.push(url);
+               } else {
+                 uploadedPhotos.push(photo); // Already URL or null
+               }
+            }
+            vehicleData.foto_1 = uploadedPhotos[0] || null;
+            vehicleData.foto_2 = uploadedPhotos[1] || null;
+            vehicleData.foto_3 = uploadedPhotos[2] || null;
+            vehicleData.foto_4 = uploadedPhotos[3] || null;
+          }
+
+          if (_offline_base64_dealer && _offline_base64_dealer.startsWith('data:image')) {
+             vehicleData.dealer_sheet_photo = await uploadBase64ToStorage(_offline_base64_dealer, `fichas/${vehicleData.vin}`);
+          }
 
           const { error: vehicleError } = await supabase.from('vehiculos').insert(vehicleData);
           if (vehicleError) throw new Error(vehicleError.message);
@@ -289,7 +312,24 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
 
       case 'delivery':
         if (op.action === 'create') {
-          const { id, ...entregaData } = op.data;
+          const { id, photos, ...entregaData } = op.data;
+          
+          if (photos && Array.isArray(photos)) {
+            const uploadedPhotos = [];
+            for (const photo of photos) {
+              if (photo && photo.startsWith('data:image')) {
+                 const url = await uploadBase64ToStorage(photo, `entregas/${entregaData.vehicle_id}`);
+                 uploadedPhotos.push(url);
+              } else {
+                 uploadedPhotos.push(photo);
+              }
+            }
+            entregaData.foto_1 = uploadedPhotos[0] || null;
+            entregaData.foto_2 = uploadedPhotos[1] || null;
+            entregaData.foto_3 = uploadedPhotos[2] || null;
+            entregaData.foto_4 = uploadedPhotos[3] || null;
+          }
+
           // First insert the delivery
           const { error: deliveryError } = await supabase.from('vehiculos_entregados').insert(entregaData);
           if (deliveryError) throw new Error(deliveryError.message);

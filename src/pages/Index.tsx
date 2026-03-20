@@ -11,7 +11,7 @@ import { useProjectsDB } from "@/hooks/useProjectsDB";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOfflineSafe } from "@/contexts/OfflineContext";
 import { Loader2, WifiOff } from "lucide-react";
-import { Company, Project, Vehicle, EquipmentInstallation } from "@/types";
+import { Company, Project, Vehicle, EquipmentInstallation, VehicleCheckItem } from "@/types";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { TabType } from "@/types";
 
@@ -96,9 +96,9 @@ const Index = () => {
     deliveryDate: v.delivery_date,
     deliveryTime: v.delivery_time,
     kmEntry: v.km_entry,
-    checkItems: v.check_items as unknown as Vehicle['checkItems'],
-    photos: v.photos,
-    status: v.status as Vehicle['status'],
+    checkItems: Array.isArray(v.check_items) ? (v.check_items as unknown) as VehicleCheckItem[] : [],
+    photos: [v.foto_1, v.foto_2, v.foto_3, v.foto_4].filter(Boolean) as string[],
+    status: v.status as 'pending' | 'in-progress' | 'completed',
     createdAt: new Date(v.created_at),
     deliveryPersonName: v.delivery_person_name || undefined,
     deliveryPersonPosition: v.delivery_person_position || undefined,

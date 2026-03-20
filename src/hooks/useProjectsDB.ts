@@ -5,6 +5,31 @@ import type { Json } from '@/integrations/supabase/types';
 import { offlineStorage } from '@/services/offlineStorage';
 import { useOfflineSafe } from '@/contexts/OfflineContext';
 
+export const uploadBase64ToStorage = async (base64String: string | null | undefined, folderName: string): Promise<string | null> => {
+  if (!base64String || !base64String.startsWith('data:image')) return base64String || null;
+  
+  try {
+    const res = await fetch(base64String);
+    const blob = await res.blob();
+    const filename = `${folderName}/${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+    
+    const { error } = await supabase.storage
+      .from('photos')
+      .upload(filename, blob, { contentType: 'image/jpeg', upsert: false });
+      
+    if (error) {
+      console.error('Error uploading to storage:', error);
+      return null;
+    }
+    
+    const { data } = supabase.storage.from('photos').getPublicUrl(filename);
+    return data.publicUrl;
+  } catch (error) {
+    console.error('Error converting/uploading photo:', error);
+    return null;
+  }
+};
+
 export interface EmpresaDB {
   id: string;
   name: string;
@@ -35,7 +60,10 @@ export interface VehiculoDB {
   delivery_time: string;
   km_entry: string;
   check_items: Json;
-  photos: string[];
+  foto_1: string | null;
+  foto_2: string | null;
+  foto_3: string | null;
+  foto_4: string | null;
   status: string;
   created_at: string;
   delivery_person_name: string | null;
@@ -65,7 +93,10 @@ export interface VehiculoEntregadoDB {
   delivery_time: string;
   km_exit: string;
   check_items: Json;
-  photos: string[];
+  foto_1: string | null;
+  foto_2: string | null;
+  foto_3: string | null;
+  foto_4: string | null;
   receiver_name: string;
   receiver_position: string;
   receiver_signature: string;
@@ -244,6 +275,7 @@ export function useProjectsDB() {
     delivery_signature?: string;
     cochera?: string;
     observations?: string;
+    dealer_sheet_photo?: string;
   }) => {
     const vehiculoData = {
       project_id: vehiculo.project_id,
@@ -255,7 +287,10 @@ export function useProjectsDB() {
       delivery_time: vehiculo.delivery_time,
       km_entry: vehiculo.km_entry,
       check_items: vehiculo.check_items,
-      photos: vehiculo.photos,
+      foto_1: vehiculo.photos[0] || null,
+      foto_2: vehiculo.photos[1] || null,
+      foto_3: vehiculo.photos[2] || null,
+      foto_4: vehiculo.photos[3] || null,
       status: vehiculo.status || 'pending',
       delivery_person_name: vehiculo.delivery_person_name || null,
       delivery_person_position: vehiculo.delivery_person_position || null,
@@ -263,6 +298,7 @@ export function useProjectsDB() {
       delivery_signature: vehiculo.delivery_signature || null,
       cochera: vehiculo.cochera || null,
       observations: vehiculo.observations || null,
+      dealer_sheet_photo: vehiculo.dealer_sheet_photo || null,
     };
 
     // OFFLINE PATH
@@ -321,9 +357,31 @@ export function useProjectsDB() {
     }
 
     // ONLINE PATH
+    const uploadedPhotos = [];
+    for (const photo of vehiculo.photos) {
+      if (photo) {
+        const url = await uploadBase64ToStorage(photo, `vehiculos/${vehiculo.vin}`);
+        uploadedPhotos.push(url);
+      }
+    }
+    
+    let dealerSheetUrl = vehiculo.dealer_sheet_photo || null;
+    if (vehiculo.dealer_sheet_photo) {
+       dealerSheetUrl = await uploadBase64ToStorage(vehiculo.dealer_sheet_photo, `fichas/${vehiculo.vin}`);
+    }
+
+    const onlineVehiculoData = {
+      ...vehiculoData,
+      foto_1: uploadedPhotos[0] || null,
+      foto_2: uploadedPhotos[1] || null,
+      foto_3: uploadedPhotos[2] || null,
+      foto_4: uploadedPhotos[3] || null,
+      dealer_sheet_photo: dealerSheetUrl,
+    };
+
     const { data, error } = await supabase
       .from('vehiculos')
-      .insert(vehiculoData)
+      .insert(onlineVehiculoData)
       .select()
       .single();
 
@@ -463,7 +521,10 @@ export function useProjectsDB() {
           delivery_time: entrega.delivery_time,
           km_exit: entrega.km_exit,
           check_items: entrega.check_items,
-          photos: entrega.photos,
+          foto_1: entrega.photos[0] || null,
+          foto_2: entrega.photos[1] || null,
+          foto_3: entrega.photos[2] || null,
+          foto_4: entrega.photos[3] || null,
           receiver_name: entrega.receiver_name,
           receiver_position: entrega.receiver_position,
           receiver_signature: entrega.receiver_signature,
@@ -481,7 +542,15 @@ export function useProjectsDB() {
       }
     }
 
-    // Online: Insert into vehiculos_entregados
+    // Online: Upload photos first
+    const uploadedPhotos = [];
+    for (const photo of entrega.photos) {
+      if (photo) {
+        const url = await uploadBase64ToStorage(photo, `entregas/${entrega.vehicle_id}`);
+        uploadedPhotos.push(url);
+      }
+    }
+
     const { data, error } = await supabase
       .from('vehiculos_entregados')
       .insert({
@@ -491,7 +560,10 @@ export function useProjectsDB() {
         delivery_time: entrega.delivery_time,
         km_exit: entrega.km_exit,
         check_items: entrega.check_items,
-        photos: entrega.photos,
+        foto_1: uploadedPhotos[0] || null,
+        foto_2: uploadedPhotos[1] || null,
+        foto_3: uploadedPhotos[2] || null,
+        foto_4: uploadedPhotos[3] || null,
         receiver_name: entrega.receiver_name,
         receiver_position: entrega.receiver_position,
         receiver_signature: entrega.receiver_signature,

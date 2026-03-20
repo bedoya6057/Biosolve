@@ -140,7 +140,7 @@ export function PhotoCapture({ photos, maxPhotos, onPhotosChange }: PhotoCapture
   if (showCamera) {
     return (
       <div className="fixed inset-0 z-50 bg-foreground flex flex-col">
-        <video ref={videoRef} autoPlay playsInline className="flex-1 object-cover" />
+        <video ref={videoRef} autoPlay playsInline className="flex-1 object-contain bg-black" />
         <canvas ref={canvasRef} className="hidden" />
 
         <div className="absolute bottom-0 left-0 right-0 p-6 flex items-center justify-center gap-6 bg-gradient-to-t from-foreground/80 to-transparent">
@@ -205,7 +205,7 @@ export function PhotoCapture({ photos, maxPhotos, onPhotosChange }: PhotoCapture
               src={photo}
               alt={`Foto ${index + 1}`}
               loading="lazy"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain bg-black"
             />
             <button
               type="button"

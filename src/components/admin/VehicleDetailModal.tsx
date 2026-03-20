@@ -87,6 +87,10 @@ export function VehicleDetailModal({ vehicle, project, progress, viewMode, deliv
     return acc;
   }, {} as Record<string, typeof deliveryCheckItems>) || {};
 
+  const deliveryPhotos = deliveryData 
+    ? [deliveryData.foto_1, deliveryData.foto_2, deliveryData.foto_3, deliveryData.foto_4].filter(Boolean) as string[] 
+    : [];
+
   const getTitle = () => {
     switch (viewMode) {
       case 'ficha':
@@ -380,7 +384,7 @@ export function VehicleDetailModal({ vehicle, project, progress, viewMode, deliv
                           <img 
                             src={photo} 
                             alt={`Foto ${idx + 1}`} 
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain bg-black"
                           />
                         </div>
                       ))}
@@ -398,19 +402,19 @@ export function VehicleDetailModal({ vehicle, project, progress, viewMode, deliv
             {/* Fotos de Entrega */}
             {viewMode === 'fotos-entrega' && (
               <>
-                {deliveryData && deliveryData.photos.length > 0 ? (
+                {deliveryData && deliveryPhotos.length > 0 ? (
                   <div className="space-y-4">
                     <h3 className="font-display font-bold flex items-center gap-2">
                       <Image className="w-4 h-4" />
-                      Fotos de Entrega ({deliveryData.photos.length})
+                      Fotos de Entrega ({deliveryPhotos.length})
                     </h3>
                     <div className="grid grid-cols-1 gap-4">
-                      {deliveryData.photos.map((photo, idx) => (
+                      {deliveryPhotos.map((photo, idx) => (
                         <div key={idx} className="aspect-video rounded-lg overflow-hidden bg-muted">
                           <img 
                             src={photo} 
                             alt={`Foto ${idx + 1}`} 
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain bg-black"
                           />
                         </div>
                       ))}

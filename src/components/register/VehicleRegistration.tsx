@@ -478,7 +478,7 @@ export function VehicleRegistration({ projects, onAddVehicle, checkVinExists, ch
                       <img 
                         src={dealerSheetPhoto} 
                         alt="Ficha de concesionario" 
-                        className="w-full h-48 object-cover rounded-lg border border-border"
+                        className="w-full h-48 object-contain bg-black rounded-lg border border-border"
                       />
                       <Button
                         variant="destructive"
