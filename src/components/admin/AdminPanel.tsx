@@ -526,7 +526,7 @@ export function AdminPanel({
                                               }}
                                             >
                                               <Image className="w-4 h-4 mr-2" />
-                                              Fotos ({deliveryData.photos.length})
+                                              Fotos ({[deliveryData.foto_1, deliveryData.foto_2, deliveryData.foto_3, deliveryData.foto_4].filter(Boolean).length})
                                             </Button>
                                           </div>
                                         </div>
