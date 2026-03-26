@@ -345,6 +345,14 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
           if (error) throw new Error(error.message);
         }
         break;
+
+      case 'vehicle_equipment_observation':
+        if (op.action === 'update') {
+          const { id, equipment_observations } = op.data;
+          const { error } = await supabase.from('vehiculos').update({ equipment_observations }).eq('id', id);
+          if (error) throw new Error(error.message);
+        }
+        break;
     }
   };
 

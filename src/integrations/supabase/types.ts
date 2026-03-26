@@ -111,6 +111,7 @@ export type Database = {
           installed: boolean
           installed_at: string | null
           notes: string | null
+          user_id: string | null
           vehicle_id: string
         }
         Insert: {
@@ -120,6 +121,7 @@ export type Database = {
           installed?: boolean
           installed_at?: string | null
           notes?: string | null
+          user_id?: string | null
           vehicle_id: string
         }
         Update: {
@@ -129,6 +131,7 @@ export type Database = {
           installed?: boolean
           installed_at?: string | null
           notes?: string | null
+          user_id?: string | null
           vehicle_id?: string
         }
         Relationships: [
@@ -244,6 +247,7 @@ export type Database = {
           km_entry: string
           model: string
           observations: string | null
+          equipment_observations: string | null
           foto_1: string | null
           foto_2: string | null
           foto_3: string | null
@@ -251,6 +255,7 @@ export type Database = {
           plate: string | null
           project_id: string
           status: string
+          user_id: string | null
           vin: string
         }
         Insert: {
@@ -269,6 +274,7 @@ export type Database = {
           km_entry: string
           model: string
           observations?: string | null
+          equipment_observations?: string | null
           foto_1?: string | null
           foto_2?: string | null
           foto_3?: string | null
@@ -276,6 +282,7 @@ export type Database = {
           plate?: string | null
           project_id: string
           status?: string
+          user_id?: string | null
           vin: string
         }
         Update: {
@@ -294,6 +301,7 @@ export type Database = {
           km_entry?: string
           model?: string
           observations?: string | null
+          equipment_observations?: string | null
           foto_1?: string | null
           foto_2?: string | null
           foto_3?: string | null
@@ -301,6 +309,7 @@ export type Database = {
           plate?: string | null
           project_id?: string
           status?: string
+          user_id?: string | null
           vin?: string
         }
         Relationships: [

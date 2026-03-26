@@ -69,23 +69,23 @@ export function VehicleDetailModal({ vehicle, project, progress, viewMode, deliv
     }
   };
 
-  const groupedCheckItems = vehicle.checkItems.reduce((acc, item) => {
+  const groupedCheckItems = Array.isArray(vehicle.checkItems) ? vehicle.checkItems.reduce((acc, item) => {
     if (!acc[item.category]) {
       acc[item.category] = [];
     }
     acc[item.category].push(item);
     return acc;
-  }, {} as Record<string, typeof vehicle.checkItems>);
+  }, {} as Record<string, typeof vehicle.checkItems>) : {};
 
   // Parse delivery check items if available
   const deliveryCheckItems = deliveryData?.check_items as { category: string; item: string; hasIt: boolean | null; observation: string }[] | undefined;
-  const groupedDeliveryCheckItems = deliveryCheckItems?.reduce((acc, item) => {
+  const groupedDeliveryCheckItems = Array.isArray(deliveryCheckItems) ? deliveryCheckItems.reduce((acc, item) => {
     if (!acc[item.category]) {
       acc[item.category] = [];
     }
     acc[item.category].push(item);
     return acc;
-  }, {} as Record<string, typeof deliveryCheckItems>) || {};
+  }, {} as Record<string, typeof deliveryCheckItems>) : {};
 
   const deliveryPhotos = deliveryData 
     ? [deliveryData.foto_1, deliveryData.foto_2, deliveryData.foto_3, deliveryData.foto_4].filter(Boolean) as string[] 

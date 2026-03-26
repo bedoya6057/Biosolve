@@ -5,7 +5,7 @@ const DB_VERSION = 1;
 
 export interface PendingOperation {
   id: string;
-  type: 'vehicle' | 'installation' | 'delivery' | 'audit';
+  type: 'vehicle' | 'installation' | 'delivery' | 'audit' | 'vehicle_equipment_observation';
   action: 'create' | 'update' | 'delete';
   data: any;
   timestamp: number;
@@ -179,7 +179,7 @@ class OfflineStorageService {
     await this.saveOfflineData({ vehiculos });
   }
 
-  async updateLocalInstalacion(vehicleId: string, equipmentId: string, installed: boolean, notes?: string): Promise<void> {
+  async updateLocalInstalacion(vehicleId: string, equipmentId: string, installed: boolean, notes?: string, user_id?: string | null): Promise<void> {
     const existing = await this.getOfflineData();
     const data: OfflineData =
       existing ??
@@ -204,6 +204,7 @@ class OfflineStorageService {
       installed,
       installed_at: installed ? new Date().toISOString() : null,
       notes: notes || null,
+      user_id: user_id || null,
       created_at: new Date().toISOString(),
     };
 

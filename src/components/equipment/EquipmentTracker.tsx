@@ -43,7 +43,7 @@ export function EquipmentTracker({
   // Sync comments when vehicle changes
   useEffect(() => {
     if (selectedVehicle) {
-      setComments(selectedVehicle.observations || "");
+      setComments(selectedVehicle.equipmentObservations || "");
       setSaved(false);
     }
   }, [selectedVehicle?.id]);
@@ -244,7 +244,7 @@ export function EquipmentTracker({
                   <CardTitle className="text-sm font-semibold flex items-center justify-between">
                     <span className="flex items-center gap-2">
                       <MessageSquare className="w-4 h-4" />
-                      Comentarios
+                      Observaciones de Equipamiento
                     </span>
                     {isSaving && (
                       <span className="text-xs text-muted-foreground animate-pulse">Guardando...</span>

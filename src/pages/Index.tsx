@@ -58,6 +58,7 @@ const Index = () => {
     updateVehicleCochera,
     updateVehicleProject,
     updateVehicleObservations,
+    updateEquipmentObservations,
     updateEmpresa,
     deleteEmpresa,
     updateProyectoEquipment,
@@ -107,6 +108,7 @@ const Index = () => {
     deliverySignature: v.delivery_signature || undefined,
     cochera: v.cochera || undefined,
     observations: v.observations || undefined,
+    equipmentObservations: v.equipment_observations || undefined,
     dealerSheetPhoto: v.dealer_sheet_photo || undefined,
   })), [vehiculos]);
 
@@ -256,7 +258,7 @@ const Index = () => {
             installations={installations}
             onSearchVehicle={handleSearchVehicleNotDelivered}
             onUpdateInstallation={updateInstalacion}
-            onUpdateObservations={updateVehicleObservations}
+            onUpdateObservations={updateEquipmentObservations}
             getVehicleProgress={getVehicleProgress}
           />
         )}

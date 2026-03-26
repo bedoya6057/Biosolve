@@ -72,7 +72,9 @@ export interface VehiculoDB {
   delivery_signature: string | null;
   cochera: string | null;
   observations: string | null;
+  equipment_observations?: string | null;
   dealer_sheet_photo: string | null;
+  user_id?: string | null;
 }
 
 export interface InstalacionDB {
@@ -82,6 +84,7 @@ export interface InstalacionDB {
   installed: boolean;
   installed_at: string | null;
   notes: string | null;
+  user_id?: string | null;
   created_at: string;
 }
 
@@ -277,6 +280,9 @@ export function useProjectsDB() {
     observations?: string;
     dealer_sheet_photo?: string;
   }) => {
+    const { data: userData } = await supabase.auth.getUser();
+    const userId = userData?.user?.id || null;
+
     const vehiculoData = {
       project_id: vehiculo.project_id,
       vin: vehiculo.vin,
@@ -299,6 +305,7 @@ export function useProjectsDB() {
       cochera: vehiculo.cochera || null,
       observations: vehiculo.observations || null,
       dealer_sheet_photo: vehiculo.dealer_sheet_photo || null,
+      user_id: userId,
     };
 
     // OFFLINE PATH
@@ -418,15 +425,18 @@ export function useProjectsDB() {
   }, [isOnline, proyectos, addPendingOperation]);
 
   const updateInstalacion = useCallback(async (vehicleId: string, equipmentId: string, installed: boolean, notes?: string) => {
+    const { data: userData } = await supabase.auth.getUser();
+    const userId = userData?.user?.id || null;
+
     if (!isOnline) {
       try {
         await addPendingOperation({
           type: 'installation',
           action: 'update',
-          data: { vehicle_id: vehicleId, equipment_id: equipmentId, installed, notes },
+          data: { vehicle_id: vehicleId, equipment_id: equipmentId, installed, notes, user_id: userId },
         });
 
-        await offlineStorage.updateLocalInstalacion(vehicleId, equipmentId, installed, notes);
+        await offlineStorage.updateLocalInstalacion(vehicleId, equipmentId, installed, notes, userId);
         toast.success('Instalación guardada localmente');
       } catch (e) {
         console.error('Error saving instalacion offline:', e);
@@ -449,6 +459,7 @@ export function useProjectsDB() {
         installed,
         installed_at: installed ? new Date().toISOString() : null,
         notes: notes || null,
+        user_id: userId,
       })
       .eq('vehicle_id', vehicleId)
       .eq('equipment_id', equipmentId);
@@ -664,6 +675,23 @@ export function useProjectsDB() {
 
     setVehiculos(prev => prev.map(v =>
       v.id === vehicleId ? { ...v, observations: observations || null } : v
+    ));
+  }, []);
+
+  const updateEquipmentObservations = useCallback(async (vehicleId: string, equipmentObservations: string) => {
+    const { error } = await supabase
+      .from('vehiculos')
+      .update({ equipment_observations: equipmentObservations || null })
+      .eq('id', vehicleId);
+
+    if (error) {
+      console.error('Error updating equipment observations:', error);
+      toast.error('Error al guardar comentarios del equipamiento');
+      throw error;
+    }
+
+    setVehiculos(prev => prev.map(v =>
+      v.id === vehicleId ? { ...v, equipment_observations: equipmentObservations || null } : v
     ));
   }, []);
 
@@ -970,6 +998,7 @@ export function useProjectsDB() {
     updateVehicleCochera,
     updateVehicleProject,
     updateVehicleObservations,
+    updateEquipmentObservations,
     updateEmpresa,
     deleteEmpresa,
     updateProyectoEquipment,

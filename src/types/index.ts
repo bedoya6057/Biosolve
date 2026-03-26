@@ -52,6 +52,7 @@ export interface Vehicle {
   deliverySignature?: string;
   cochera?: string;
   observations?: string;
+  equipmentObservations?: string;
   dealerSheetPhoto?: string;
 }
 

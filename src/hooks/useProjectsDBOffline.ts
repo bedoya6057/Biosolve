@@ -87,6 +87,9 @@ export function useProjectsDBOffline() {
     cochera?: string;
     observations?: string;
   }) => {
+    const { data: userData } = await supabase.auth.getUser();
+    const userId = userData?.user?.id || null;
+
     const vehiculoData = {
       ...vehiculo,
       plate: vehiculo.plate || null,
@@ -97,6 +100,7 @@ export function useProjectsDBOffline() {
       delivery_signature: vehiculo.delivery_signature || null,
       cochera: vehiculo.cochera || null,
       observations: vehiculo.observations || null,
+      user_id: userId,
     };
 
     if (isOnline) {
@@ -161,7 +165,7 @@ export function useProjectsDBOffline() {
 
     // Update local storage + state
     await updateLocalData('vehiculo', offlineVehiculo);
-    setVehiculos(prev => [offlineVehiculo as VehiculoDB, ...prev]);
+    setVehiculos(prev => [offlineVehiculo as unknown as VehiculoDB, ...prev]);
 
     // Create local installation records (for UI progress while offline)
     if (equipmentIds.length > 0) {
@@ -183,6 +187,9 @@ export function useProjectsDBOffline() {
 
   // Update installation (with offline support)
   const updateInstalacion = async (vehicleId: string, equipmentId: string, installed: boolean, notes?: string) => {
+    const { data: userData } = await supabase.auth.getUser();
+    const userId = userData?.user?.id || null;
+
     if (isOnline) {
       const { error } = await supabase
         .from('instalaciones')
@@ -190,6 +197,7 @@ export function useProjectsDBOffline() {
           installed,
           installed_at: installed ? new Date().toISOString() : null,
           notes: notes || null,
+          user_id: userId,
         })
         .eq('vehicle_id', vehicleId)
         .eq('equipment_id', equipmentId);
@@ -204,7 +212,7 @@ export function useProjectsDBOffline() {
       await addPendingOperation({
         type: 'installation',
         action: 'update',
-        data: { vehicle_id: vehicleId, equipment_id: equipmentId, installed, notes },
+        data: { vehicle_id: vehicleId, equipment_id: equipmentId, installed, notes, user_id: userId },
       });
 
       // Update local storage
@@ -213,6 +221,7 @@ export function useProjectsDBOffline() {
         equipment_id: equipmentId,
         installed,
         notes,
+        user_id: userId,
       });
 
       toast.success('Instalación guardada localmente');
@@ -286,7 +295,7 @@ export function useProjectsDBOffline() {
         created_at: new Date().toISOString(),
         notes: entrega.notes || null,
       };
-      setVehiculosEntregados(prev => [offlineEntrega as VehiculoEntregadoDB, ...prev]);
+      setVehiculosEntregados(prev => [offlineEntrega as unknown as VehiculoEntregadoDB, ...prev]);
 
       toast.success('Entrega guardada localmente (se sincronizará cuando haya conexión)');
       return offlineEntrega;
@@ -326,6 +335,33 @@ export function useProjectsDBOffline() {
     return vehiculosEntregados.some(ve => ve.vehicle_id === vehicleId);
   };
 
+  const updateEquipmentObservations = async (vehicleId: string, equipmentObservations: string) => {
+    if (isOnline) {
+      const { error } = await supabase
+        .from('vehiculos')
+        .update({ equipment_observations: equipmentObservations || null })
+        .eq('id', vehicleId);
+        
+      if (error) {
+        console.error('Error updating equipment observations:', error);
+        toast.error('Error al guardar comentarios de equipamiento');
+        return;
+      }
+    } else {
+      // Queue for sync
+      await addPendingOperation({
+        type: 'vehicle_equipment_observation',
+        action: 'update',
+        data: { id: vehicleId, equipment_observations: equipmentObservations || null }
+      });
+      toast.success('Comentarios guardados localmente');
+    }
+    
+    setVehiculos(prev => prev.map(v =>
+      v.id === vehicleId ? { ...v, equipment_observations: equipmentObservations || null } : v
+    ));
+  };
+
   return {
     empresas,
     proyectos,
@@ -337,6 +373,7 @@ export function useProjectsDBOffline() {
     addVehiculo,
     updateInstalacion,
     deliverVehicle,
+    updateEquipmentObservations,
     getEmpresaById,
     getVehicleProgress,
     searchVehicle,

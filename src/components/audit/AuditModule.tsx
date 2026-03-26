@@ -268,10 +268,10 @@ export function AuditModule({ vehicles, projects, installations, onSearchVehicle
                 <span className="text-sm text-muted-foreground">Equipos a auditar</span>
                 <Badge variant="accent">{auditItems.length} items</Badge>
               </div>
-              {selectedVehicle.observations && (
+              {selectedVehicle.equipmentObservations && (
                 <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
                   <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-1">💬 Comentarios del técnico</p>
-                  <p className="text-sm text-blue-900 dark:text-blue-200 whitespace-pre-wrap">{selectedVehicle.observations}</p>
+                  <p className="text-sm text-blue-900 dark:text-blue-200 whitespace-pre-wrap">{selectedVehicle.equipmentObservations}</p>
                 </div>
               )}
             </div>
