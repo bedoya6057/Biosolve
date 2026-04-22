@@ -57,6 +57,27 @@ export function useEquipmentDB() {
     return data;
   };
 
+  const updateEquipment = async (id: string, name: string, category: string) => {
+    const { data, error } = await supabase
+      .from('equipamiento')
+      .update({ name, category })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating equipment:', error);
+      toast.error('Error al actualizar equipamiento');
+      throw error;
+    }
+
+    setEquipment(prev => prev.map(e => e.id === id ? data : e).sort((a, b) => 
+      a.category.localeCompare(b.category) || a.name.localeCompare(b.name)
+    ));
+    toast.success('Equipamiento actualizado');
+    return data;
+  };
+
   const deleteEquipment = async (id: string) => {
     const { error } = await supabase
       .from('equipamiento')
@@ -80,6 +101,7 @@ export function useEquipmentDB() {
     categories,
     isLoading,
     addEquipment,
+    updateEquipment,
     deleteEquipment,
     refetchEquipment: fetchEquipment,
   };
