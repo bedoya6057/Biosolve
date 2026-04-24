@@ -16,10 +16,12 @@ interface ProjectEditFormProps {
 }
 
 export function ProjectEditForm({ project, onSubmit, onCancel }: ProjectEditFormProps) {
-  const { equipment, isLoading: isLoadingEquipment } = useEquipmentDB();
+  const { equipment, categories: dbCategories, isLoading: isLoadingEquipment } = useEquipmentDB();
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>(project.equipment);
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [isSaving, setIsSaving] = useState(false);
+  
+  const allCategories = [...new Set([...equipmentCategories, ...dbCategories])].sort();
 
   const filteredEquipment = filterCategory === "all" 
     ? equipment 
@@ -114,7 +116,7 @@ export function ProjectEditForm({ project, onSubmit, onCancel }: ProjectEditForm
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas las categorías</SelectItem>
-                  {equipmentCategories.map(cat => (
+                  {allCategories.map(cat => (
                     <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                   ))}
                 </SelectContent>

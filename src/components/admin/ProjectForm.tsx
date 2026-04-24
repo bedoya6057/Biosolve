@@ -18,12 +18,14 @@ interface ProjectFormProps {
 }
 
 export function ProjectForm({ companies, onSubmit, onCancel, onAddCompany }: ProjectFormProps) {
-  const { equipment, isLoading: isLoadingEquipment } = useEquipmentDB();
+  const { equipment, categories: dbCategories, isLoading: isLoadingEquipment } = useEquipmentDB();
   const [name, setName] = useState("");
   const [companyId, setCompanyId] = useState("");
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [isSaving, setIsSaving] = useState(false);
+  
+  const allCategories = [...new Set([...equipmentCategories, ...dbCategories])].sort();
 
   const filteredEquipment = filterCategory === "all" 
     ? equipment 
@@ -135,7 +137,7 @@ export function ProjectForm({ companies, onSubmit, onCancel, onAddCompany }: Pro
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas las categorías</SelectItem>
-                  {equipmentCategories.map(cat => (
+                  {allCategories.map(cat => (
                     <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                   ))}
                 </SelectContent>
