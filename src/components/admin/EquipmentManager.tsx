@@ -36,15 +36,16 @@ export function EquipmentManager({ onClose }: EquipmentManagerProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const finalCategory = showNewCategoryInput ? newCategoryName.trim() : category;
+    const finalName = name.trim() || (showNewCategoryInput ? "General" : "");
     
-    if (!name.trim() || !finalCategory) {
+    if (!finalName || !finalCategory) {
       toast.error("Complete todos los campos");
       return;
     }
     
     setIsSaving(true);
     try {
-      await addEquipment(name.trim(), finalCategory);
+      await addEquipment(finalName, finalCategory);
       setName("");
       setCategory("");
       setNewCategoryName("");
@@ -159,7 +160,7 @@ export function EquipmentManager({ onClose }: EquipmentManagerProps) {
               <Button 
                 type="submit" 
                 className="w-full h-12"
-                disabled={!name.trim() || (showNewCategoryInput ? !newCategoryName.trim() : !category) || isSaving}
+                disabled={isSaving || (showNewCategoryInput ? !newCategoryName.trim() : (!name.trim() || !category))}
               >
                 {isSaving ? (
                   <>
