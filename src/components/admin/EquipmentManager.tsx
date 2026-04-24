@@ -159,7 +159,7 @@ export function EquipmentManager({ onClose }: EquipmentManagerProps) {
               <Button 
                 type="submit" 
                 className="w-full h-12"
-                disabled={!name.trim() || !category || isSaving}
+                disabled={!name.trim() || (showNewCategoryInput ? !newCategoryName.trim() : !category) || isSaving}
               >
                 {isSaving ? (
                   <>
