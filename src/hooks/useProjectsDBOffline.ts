@@ -5,6 +5,35 @@ import { useOfflineSafe } from '@/contexts/OfflineContext';
 import type { Json } from '@/integrations/supabase/types';
 import type { EmpresaDB, ProyectoDB, VehiculoDB, InstalacionDB, VehiculoEntregadoDB } from './useProjectsDB';
 
+const fetchAllInstalacionesOffline = async (): Promise<{ data: InstalacionDB[] | null, error: any }> => {
+  let allData: InstalacionDB[] = [];
+  let from = 0;
+  const limit = 1000;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from('instalaciones')
+      .select('*')
+      .range(from, from + limit - 1);
+
+    if (error) {
+      console.error('Error fetching instalaciones page:', error);
+      return { data: null, error };
+    }
+
+    if (data && data.length > 0) {
+      allData = [...allData, ...data];
+      from += limit;
+    }
+
+    if (!data || data.length < limit) {
+      hasMore = false;
+    }
+  }
+  return { data: allData, error: null };
+};
+
 export function useProjectsDBOffline() {
   const offlineContext = useOfflineSafe();
   const isOnline = offlineContext?.isOnline ?? true;
@@ -26,7 +55,7 @@ export function useProjectsDBOffline() {
       supabase.from('empresas').select('*').order('created_at', { ascending: false }),
       supabase.from('proyectos').select('*').order('created_at', { ascending: false }),
       supabase.from('vehiculos').select('*').order('created_at', { ascending: false }),
-      supabase.from('instalaciones').select('*'),
+      fetchAllInstalacionesOffline(),
       supabase.from('vehiculos_entregados').select('*').order('created_at', { ascending: false }),
     ]);
 

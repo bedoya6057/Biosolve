@@ -110,6 +110,35 @@ export interface VehiculoEntregadoDB {
 // Cache for delivered vehicle IDs - computed once
 const deliveredVehicleIdsCache = new Set<string>();
 
+const fetchAllInstalaciones = async (): Promise<{ data: InstalacionDB[] | null, error: any }> => {
+  let allData: InstalacionDB[] = [];
+  let from = 0;
+  const limit = 1000;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from('instalaciones')
+      .select('*')
+      .range(from, from + limit - 1);
+
+    if (error) {
+      console.error('Error fetching instalaciones page:', error);
+      return { data: null, error };
+    }
+
+    if (data && data.length > 0) {
+      allData = [...allData, ...data];
+      from += limit;
+    }
+
+    if (!data || data.length < limit) {
+      hasMore = false;
+    }
+  }
+  return { data: allData, error: null };
+};
+
 export function useProjectsDB() {
   const offlineContext = useOfflineSafe();
   const isOnline = offlineContext?.isOnline ?? true;
@@ -168,7 +197,7 @@ export function useProjectsDB() {
         supabase.from('empresas').select('*').order('created_at', { ascending: false }),
         supabase.from('proyectos').select('*').order('created_at', { ascending: false }),
         supabase.from('vehiculos').select('*').order('created_at', { ascending: false }),
-        supabase.from('instalaciones').select('*'),
+        fetchAllInstalaciones(),
         supabase.from('vehiculos_entregados').select('*').order('created_at', { ascending: false }),
       ]);
 
@@ -845,7 +874,7 @@ export function useProjectsDB() {
     }
 
     // Refresh instalaciones state
-    const { data: allInstalls } = await supabase.from('instalaciones').select('*');
+    const { data: allInstalls } = await fetchAllInstalaciones();
     if (allInstalls) {
       setInstalaciones(allInstalls);
     }
