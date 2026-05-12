@@ -1,6 +1,12 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Camera, X, RotateCcw, Check } from "lucide-react";
+import { Camera, X, RotateCcw, Check, Image as ImageIcon } from "lucide-react";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 
 interface PhotoCaptureProps {
   photos: string[];
@@ -37,6 +43,7 @@ async function compressImageFromDataUrl(dataUrl: string): Promise<string> {
 
 export function PhotoCapture({ photos, maxPhotos, onPhotosChange }: PhotoCaptureProps) {
   const [showCamera, setShowCamera] = useState(false);
+  const [showSourceSelector, setShowSourceSelector] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -102,11 +109,13 @@ export function PhotoCapture({ photos, maxPhotos, onPhotosChange }: PhotoCapture
     }
   };
 
-  const handleFileInput = () => {
+  const handleFileInput = (fromCamera: boolean = false) => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.capture = 'environment';
+    if (fromCamera) {
+      input.capture = 'environment';
+    }
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
@@ -190,13 +199,61 @@ export function PhotoCapture({ photos, maxPhotos, onPhotosChange }: PhotoCapture
             type="button"
             variant="outline"
             size="sm"
-            onClick={startCamera}
+            onClick={() => setShowSourceSelector(true)}
           >
             <Camera className="w-4 h-4 mr-2" />
-            Tomar foto
+            Agregar foto
           </Button>
         )}
       </div>
+
+      <Drawer open={showSourceSelector} onOpenChange={setShowSourceSelector}>
+        <DrawerContent>
+          <DrawerHeader className="text-left">
+            <DrawerTitle>Agregar foto</DrawerTitle>
+          </DrawerHeader>
+          <div className="p-4 grid grid-cols-1 gap-3">
+            <Button 
+              variant="outline" 
+              className="h-16 justify-start gap-4 px-4 text-base"
+              onClick={() => {
+                setShowSourceSelector(false);
+                startCamera();
+              }}
+            >
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Camera className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex flex-col items-start text-left">
+                <span className="font-semibold">Tomar foto</span>
+                <span className="text-xs text-muted-foreground">Usar la cámara del dispositivo</span>
+              </div>
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className="h-16 justify-start gap-4 px-4 text-base"
+              onClick={() => {
+                setShowSourceSelector(false);
+                handleFileInput(false);
+              }}
+            >
+              <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
+                <ImageIcon className="w-5 h-5 text-accent" />
+              </div>
+              <div className="flex flex-col items-start text-left">
+                <span className="font-semibold">Galería</span>
+                <span className="text-xs text-muted-foreground">Elegir una foto existente</span>
+              </div>
+            </Button>
+          </div>
+          <div className="p-4 pt-0">
+            <Button variant="ghost" className="w-full" onClick={() => setShowSourceSelector(false)}>
+              Cancelar
+            </Button>
+          </div>
+        </DrawerContent>
+      </Drawer>
 
       <div className="grid grid-cols-2 gap-3">
         {photos.map((photo, index) => (
@@ -223,11 +280,11 @@ export function PhotoCapture({ photos, maxPhotos, onPhotosChange }: PhotoCapture
         {photos.length < maxPhotos && (
           <button
             type="button"
-            onClick={handleFileInput}
+            onClick={() => setShowSourceSelector(true)}
             className="aspect-video rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-accent hover:text-accent transition-colors"
           >
             <Camera className="w-8 h-8" />
-            <span className="text-xs">Agregar foto</span>
+            <span className="text-xs text-center px-2">Añadir desde cámara o galería</span>
           </button>
         )}
       </div>

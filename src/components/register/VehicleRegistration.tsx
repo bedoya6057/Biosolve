@@ -7,7 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Check, X, Minus, Car, FileText, Camera, ChevronRight } from "lucide-react";
+import { Check, X, Minus, Car, FileText, Camera, ChevronRight, Image as ImageIcon } from "lucide-react";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { Project, VehicleCheckItem } from "@/types";
 import { vehicleCheckTemplate } from "@/data/equipmentData";
 import { PhotoCapture } from "./PhotoCapture";
@@ -68,6 +74,7 @@ export function VehicleRegistration({ projects, onAddVehicle, checkVinExists, ch
   // Photos
   const [photos, setPhotos] = useState<string[]>([]);
   const [dealerSheetPhoto, setDealerSheetPhoto] = useState<string | null>(null);
+  const [showDealerSheetSelector, setShowDealerSheetSelector] = useState(false);
 
   const selectedProject = projects.find(p => p.id === selectedProjectId);
 
@@ -171,6 +178,36 @@ export function VehicleRegistration({ projects, onAddVehicle, checkVinExists, ch
       return !isAdmin && photos.length < 4;
     }
     return false;
+  };
+
+  const handleDealerSheetFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxSize = 1280;
+          let { width, height } = img;
+          if (width > height && width > maxSize) {
+            height = (height * maxSize) / width;
+            width = maxSize;
+          } else if (height > maxSize) {
+            width = (width * maxSize) / height;
+            height = maxSize;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          const compressed = canvas.toDataURL('image/jpeg', 0.72);
+          setDealerSheetPhoto(compressed);
+        };
+        img.src = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSignatureConfirm = async (deliveryData: DeliveryPersonData) => {
@@ -493,49 +530,67 @@ export function VehicleRegistration({ projects, onAddVehicle, checkVinExists, ch
                     <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-border rounded-lg bg-muted/30">
                       <Camera className="w-8 h-8 text-muted-foreground mb-2" />
                       <p className="text-sm text-muted-foreground mb-3">Capturar foto de la ficha del concesionario</p>
-                      <label className="cursor-pointer">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          capture="environment"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              const reader = new FileReader();
-                              reader.onloadend = () => {
-                                const img = new Image();
-                                img.onload = () => {
-                                  const canvas = document.createElement('canvas');
-                                  const maxSize = 1280;
-                                  let { width, height } = img;
-                                  if (width > height && width > maxSize) {
-                                    height = (height * maxSize) / width;
-                                    width = maxSize;
-                                  } else if (height > maxSize) {
-                                    width = (width * maxSize) / height;
-                                    height = maxSize;
-                                  }
-                                  canvas.width = width;
-                                  canvas.height = height;
-                                  const ctx = canvas.getContext('2d');
-                                  ctx?.drawImage(img, 0, 0, width, height);
-                                  const compressed = canvas.toDataURL('image/jpeg', 0.72);
-                                  setDealerSheetPhoto(compressed);
-                                };
-                                img.src = reader.result as string;
-                              };
-                              reader.readAsDataURL(file);
-                            }
-                          }}
-                        />
-                        <Button variant="outline" asChild>
-                          <span>
-                            <Camera className="w-4 h-4 mr-2" />
-                            Tomar Foto
-                          </span>
+                      
+                      <Drawer open={showDealerSheetSelector} onOpenChange={setShowDealerSheetSelector}>
+                        <Button variant="outline" onClick={() => setShowDealerSheetSelector(true)}>
+                          <Camera className="w-4 h-4 mr-2" />
+                          Agregar Foto
                         </Button>
-                      </label>
+                        <DrawerContent>
+                          <DrawerHeader className="text-left">
+                            <DrawerTitle>Foto de Ficha</DrawerTitle>
+                          </DrawerHeader>
+                          <div className="p-4 grid grid-cols-1 gap-3">
+                            <Button 
+                              variant="outline" 
+                              className="h-16 justify-start gap-4 px-4 text-base"
+                              onClick={() => {
+                                setShowDealerSheetSelector(false);
+                                const input = document.createElement('input');
+                                input.type = 'file';
+                                input.accept = 'image/*';
+                                input.capture = 'environment';
+                                input.onchange = (e) => handleDealerSheetFile(e as any);
+                                input.click();
+                              }}
+                            >
+                              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                <Camera className="w-5 h-5 text-primary" />
+                              </div>
+                              <div className="flex flex-col items-start text-left">
+                                <span className="font-semibold">Tomar foto</span>
+                                <span className="text-xs text-muted-foreground">Usar la cámara del dispositivo</span>
+                              </div>
+                            </Button>
+
+                            <Button 
+                              variant="outline" 
+                              className="h-16 justify-start gap-4 px-4 text-base"
+                              onClick={() => {
+                                setShowDealerSheetSelector(false);
+                                const input = document.createElement('input');
+                                input.type = 'file';
+                                input.accept = 'image/*';
+                                input.onchange = (e) => handleDealerSheetFile(e as any);
+                                input.click();
+                              }}
+                            >
+                              <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
+                                <ImageIcon className="w-5 h-5 text-accent" />
+                              </div>
+                              <div className="flex flex-col items-start text-left">
+                                <span className="font-semibold">Galería</span>
+                                <span className="text-xs text-muted-foreground">Elegir una foto existente</span>
+                              </div>
+                            </Button>
+                          </div>
+                          <div className="p-4 pt-0">
+                            <Button variant="ghost" className="w-full" onClick={() => setShowDealerSheetSelector(false)}>
+                              Cancelar
+                            </Button>
+                          </div>
+                        </DrawerContent>
+                      </Drawer>
                     </div>
                   )}
                 </div>
