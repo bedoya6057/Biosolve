@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Camera, X, RotateCcw, Check, Image as ImageIcon } from "lucide-react";
 import {
@@ -56,16 +56,19 @@ export function PhotoCapture({ photos, maxPhotos, onPhotosChange }: PhotoCapture
       });
       setStream(mediaStream);
       setShowCamera(true);
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-      }
     } catch (error) {
       console.error('Error accessing camera:', error);
-      // Fallback to file input
-      handleFileInput();
+      // Fallback to file input with camera capture
+      handleFileInput(true);
     }
   };
+
+  useEffect(() => {
+    if (showCamera && stream && videoRef.current) {
+      videoRef.current.srcObject = stream;
+      videoRef.current.play().catch(err => console.error("Error playing video:", err));
+    }
+  }, [showCamera, stream]);
 
   const stopCamera = () => {
     if (stream) {
@@ -87,7 +90,10 @@ export function PhotoCapture({ photos, maxPhotos, onPhotosChange }: PhotoCapture
     try {
       setIsProcessing(true);
 
-      const target = scaleToFit(video.videoWidth || 1280, video.videoHeight || 720, MAX_IMAGE_WIDTH);
+      const videoWidth = video.videoWidth || 1280;
+      const videoHeight = video.videoHeight || 720;
+      
+      const target = scaleToFit(videoWidth, videoHeight, MAX_IMAGE_WIDTH);
       canvas.width = target.width;
       canvas.height = target.height;
 
@@ -149,7 +155,13 @@ export function PhotoCapture({ photos, maxPhotos, onPhotosChange }: PhotoCapture
   if (showCamera) {
     return (
       <div className="fixed inset-0 z-50 bg-foreground flex flex-col">
-        <video ref={videoRef} autoPlay playsInline className="flex-1 object-contain bg-black" />
+        <video 
+          ref={videoRef} 
+          autoPlay 
+          playsInline 
+          muted 
+          className="flex-1 object-contain bg-black" 
+        />
         <canvas ref={canvasRef} className="hidden" />
 
         <div className="absolute bottom-0 left-0 right-0 p-6 flex items-center justify-center gap-6 bg-gradient-to-t from-foreground/80 to-transparent">

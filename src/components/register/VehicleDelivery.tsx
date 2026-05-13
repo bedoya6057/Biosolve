@@ -126,14 +126,7 @@ export function VehicleDelivery({ projects, vehicles, getVehiculosPendientes, on
       return;
     }
 
-    if (photos.length < 4) {
-      toast({
-        title: "Fotos requeridas",
-        description: `Debe tomar ${4 - photos.length} foto(s) más`,
-        variant: "destructive",
-      });
-      return;
-    }
+    // Removed minimum 4 photos requirement per user request
 
     setShowSignatureModal(true);
   };
@@ -453,7 +446,7 @@ export function VehicleDelivery({ projects, vehicles, getVehiculosPendientes, on
                 <TabsTrigger value="photos" className="gap-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
                   <Camera className="w-4 h-4" />
                   <span>Fotos</span>
-                  <Badge variant={photos.length >= 4 ? "success" : "secondary"} className="ml-1 text-xs">
+                  <Badge variant={photos.length > 0 ? "success" : "secondary"} className="ml-1 text-xs">
                     {photos.length}/4
                   </Badge>
                 </TabsTrigger>
@@ -462,7 +455,7 @@ export function VehicleDelivery({ projects, vehicles, getVehiculosPendientes, on
                 <Button 
                   onClick={handleSaveClick}
                   className="w-full h-12 font-semibold"
-                  disabled={!selectedVehicleId || photos.length < 4 || !deliveryDate || !deliveryTime}
+                  disabled={!selectedVehicleId || !deliveryDate || !deliveryTime}
                 >
                   Confirmar Entrega
                   <ChevronRight className="w-5 h-5 ml-2" />
