@@ -24,7 +24,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Users, Plus, Loader2, Shield, ClipboardList, Wrench, Trash2, ClipboardCheck, Pencil } from 'lucide-react';
 import { z } from 'zod';
 
-type AppRole = 'admin' | 'registrador' | 'tecnico' | 'auditor';
+type AppRole = 'admin' | 'registrador' | 'tecnico' | 'auditor' | 'cliente';
 
 interface Usuario {
   id: string;
@@ -34,6 +34,7 @@ interface Usuario {
   email: string;
   created_at: string;
   role?: AppRole;
+  empresa_id?: string | null;
 }
 
 const userSchema = z.object({
@@ -41,7 +42,8 @@ const userSchema = z.object({
   apellido: z.string().trim().min(1, { message: 'El apellido es requerido' }).max(100),
   email: z.string().trim().email({ message: 'Email inválido' }).max(255),
   password: z.string().min(6, { message: 'La contraseña debe tener al menos 6 caracteres' }),
-  role: z.enum(['admin', 'registrador', 'tecnico', 'auditor']),
+  role: z.enum(['admin', 'registrador', 'tecnico', 'auditor', 'cliente']),
+  empresa_id: z.string().optional().nullable(),
 });
 
 const roleLabels: Record<AppRole, { label: string; icon: React.ReactNode; color: string }> = {
@@ -49,9 +51,11 @@ const roleLabels: Record<AppRole, { label: string; icon: React.ReactNode; color:
   registrador: { label: 'Registrador', icon: <ClipboardList className="w-4 h-4" />, color: 'bg-blue-500/10 text-blue-500' },
   tecnico: { label: 'Técnico', icon: <Wrench className="w-4 h-4" />, color: 'bg-green-500/10 text-green-500' },
   auditor: { label: 'Auditor', icon: <ClipboardCheck className="w-4 h-4" />, color: 'bg-purple-500/10 text-purple-500' },
+  cliente: { label: 'Cliente', icon: <Users className="w-4 h-4 text-amber-500" />, color: 'bg-amber-500/10 text-amber-500' },
 };
 
 export function UserManagement() {
+  const [empresas, setEmpresas] = useState<{ id: string; name: string }[]>([]);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -64,6 +68,7 @@ export function UserManagement() {
     email: '',
     password: '',
     role: 'registrador' as AppRole,
+    empresa_id: '',
   });
   const [editFormData, setEditFormData] = useState({
     nombre: '',
@@ -71,13 +76,28 @@ export function UserManagement() {
     email: '',
     password: '',
     role: 'registrador' as AppRole,
+    empresa_id: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
   useEffect(() => {
     fetchUsuarios();
+    fetchEmpresas();
   }, []);
+
+  const fetchEmpresas = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('empresas')
+        .select('id, name')
+        .order('name');
+      if (error) throw error;
+      setEmpresas(data || []);
+    } catch (error) {
+      console.error('Error fetching empresas:', error);
+    }
+  };
 
   const fetchUsuarios = async () => {
     try {
@@ -126,6 +146,11 @@ export function UserManagement() {
       return;
     }
 
+    if (formData.role === 'cliente' && !formData.empresa_id) {
+      setErrors({ empresa_id: 'Debe seleccionar una empresa para el cliente' });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -143,6 +168,18 @@ export function UserManagement() {
       if (error) throw error;
       if (!data.success) throw new Error(data.error || 'Error al crear el usuario');
 
+      // Update empresa_id directly
+      if (formData.role === 'cliente' && formData.empresa_id) {
+        const { error: updateError } = await supabase
+          .from('usuarios')
+          .update({ empresa_id: formData.empresa_id })
+          .eq('email', formData.email.trim());
+        
+        if (updateError) {
+          console.error('Error updating empresa_id:', updateError);
+        }
+      }
+
       toast({
         title: 'Usuario creado',
         description: `${formData.nombre} ${formData.apellido} ha sido registrado como ${roleLabels[formData.role].label}`,
@@ -154,6 +191,7 @@ export function UserManagement() {
         email: '',
         password: '',
         role: 'registrador',
+        empresa_id: '',
       });
       setShowForm(false);
       fetchUsuarios();
@@ -177,6 +215,7 @@ export function UserManagement() {
       email: usuario.email,
       password: '',
       role: usuario.role || 'registrador',
+      empresa_id: usuario.empresa_id || '',
     });
     setShowEditForm(true);
   };
@@ -204,8 +243,8 @@ export function UserManagement() {
       setIsSubmitting(false);
       return;
     }
-    if (editFormData.password && editFormData.password.length < 6) {
-      setErrors({ password: 'La contraseña debe tener al menos 6 caracteres' });
+    if (editFormData.role === 'cliente' && !editFormData.empresa_id) {
+      setErrors({ empresa_id: 'Debe seleccionar una empresa para el cliente' });
       setIsSubmitting(false);
       return;
     }
@@ -225,6 +264,15 @@ export function UserManagement() {
 
       if (error) throw error;
       if (!data.success) throw new Error(data.error || 'Error al actualizar el usuario');
+
+      // Update empresa_id directly
+      const empresaVal = editFormData.role === 'cliente' ? editFormData.empresa_id : null;
+      const { error: updateError } = await supabase
+        .from('usuarios')
+        .update({ empresa_id: empresaVal })
+        .eq('user_id', editingUser.user_id);
+
+      if (updateError) throw updateError;
 
       toast({
         title: 'Usuario actualizado',
@@ -468,10 +516,38 @@ export function UserManagement() {
                       Auditor - Auditoría de equipos
                     </div>
                   </SelectItem>
+                  <SelectItem value="cliente">
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-amber-500" />
+                      Cliente - Solo Dashboard y proyectos asignados
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
               {errors.role && <p className="text-sm text-destructive">{errors.role}</p>}
             </div>
+
+            {formData.role === 'cliente' && (
+              <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                <Label htmlFor="empresa_id">Cliente / Empresa Asociada</Label>
+                <Select
+                  value={formData.empresa_id}
+                  onValueChange={(value: string) => setFormData({ ...formData, empresa_id: value })}
+                >
+                  <SelectTrigger className={errors.empresa_id ? 'border-destructive' : ''}>
+                    <SelectValue placeholder="Seleccionar cliente/empresa" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {empresas.map((emp) => (
+                      <SelectItem key={emp.id} value={emp.id}>
+                        {emp.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.empresa_id && <p className="text-sm text-destructive">{errors.empresa_id}</p>}
+              </div>
+            )}
 
             <div className="flex gap-3 pt-2">
               <Button
@@ -593,9 +669,37 @@ export function UserManagement() {
                       Auditor
                     </div>
                   </SelectItem>
+                  <SelectItem value="cliente">
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-amber-500" />
+                      Cliente
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
+
+            {editFormData.role === 'cliente' && (
+              <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                <Label htmlFor="edit-empresa_id">Cliente / Empresa Asociada</Label>
+                <Select
+                  value={editFormData.empresa_id}
+                  onValueChange={(value: string) => setEditFormData({ ...editFormData, empresa_id: value })}
+                >
+                  <SelectTrigger className={errors.empresa_id ? 'border-destructive' : ''}>
+                    <SelectValue placeholder="Seleccionar cliente/empresa" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {empresas.map((emp) => (
+                      <SelectItem key={emp.id} value={emp.id}>
+                        {emp.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.empresa_id && <p className="text-sm text-destructive">{errors.empresa_id}</p>}
+              </div>
+            )}
 
             <div className="flex gap-3 pt-2">
               <Button

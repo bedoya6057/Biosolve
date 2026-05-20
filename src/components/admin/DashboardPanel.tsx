@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -69,11 +70,22 @@ export function DashboardPanel({
   vehiculosEntregados,
   getVehicleProgress,
 }: DashboardPanelProps) {
-  const [globalCompanyFilter, setGlobalCompanyFilter] = useState<string>("all");
+  const { userRole, userProfile } = useAuth();
+  const isCliente = userRole === 'cliente';
+
+  const [globalCompanyFilter, setGlobalCompanyFilter] = useState<string>(
+    isCliente && userProfile?.empresa_id ? userProfile.empresa_id : "all"
+  );
   const [globalProjectFilter, setGlobalProjectFilter] = useState<string>("all");
   const [equipmentFilter, setEquipmentFilter] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<"all" | "installed" | "pending">("all");
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isCliente && userProfile?.empresa_id) {
+      setGlobalCompanyFilter(userProfile.empresa_id);
+    }
+  }, [isCliente, userProfile?.empresa_id]);
   const { equipment: equipmentDB } = useEquipmentDB();
 
   // ── Global Filtering ──────────────────────────────────────────
@@ -369,7 +381,11 @@ export function DashboardPanel({
         className="p-4 pb-24 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500"
         onDoubleClick={() => {
           // Clear all filters on double click (PowerBI style)
-          setGlobalCompanyFilter("all");
+          if (isCliente && userProfile?.empresa_id) {
+            setGlobalCompanyFilter(userProfile.empresa_id);
+          } else {
+            setGlobalCompanyFilter("all");
+          }
           setGlobalProjectFilter("all");
           setEquipmentFilter(null);
           setStatusFilter("all");
@@ -379,24 +395,26 @@ export function DashboardPanel({
         
         {/* ─── Global Filters Row ───────────────────────── */}
         <div className="flex flex-col sm:flex-row gap-3 bg-muted/30 p-3 rounded-lg border border-border/50">
-          <div className="flex-1 space-y-1">
-            <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider ml-1">
-              Filtro por Cliente
-            </label>
-            <Select value={globalCompanyFilter} onValueChange={setGlobalCompanyFilter}>
-              <SelectTrigger className="h-9 glass-card border-none bg-background/50">
-                <SelectValue placeholder="Todas las empresas" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los clientes</SelectItem>
-                {companies.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {!isCliente && (
+            <div className="flex-1 space-y-1">
+              <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider ml-1">
+                Filtro por Cliente
+              </label>
+              <Select value={globalCompanyFilter} onValueChange={setGlobalCompanyFilter}>
+                <SelectTrigger className="h-9 glass-card border-none bg-background/50">
+                  <SelectValue placeholder="Todas las empresas" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los clientes</SelectItem>
+                  {companies.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="flex-1 space-y-1">
             <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider ml-1">
               Filtro por Proyecto

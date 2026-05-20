@@ -17,7 +17,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { TabType } from "@/types";
 
 const Index = () => {
-  const { userRole, isAdmin, isRegistrador, isTecnico, isAuditor } = useAuth();
+  const { userRole, isAdmin, isRegistrador, isTecnico, isAuditor, isCliente } = useAuth();
   const offlineContext = useOfflineSafe();
   const isOnline = offlineContext?.isOnline ?? true;
   const pendingOperationsCount = offlineContext?.pendingOperationsCount ?? 0;
@@ -25,11 +25,12 @@ const Index = () => {
   // Set default tab based on user role
   const getDefaultTab = useCallback((): TabType => {
     if (isAdmin) return 'dashboard';
+    if (isCliente) return 'dashboard';
     if (isRegistrador) return 'register';
     if (isTecnico) return 'equipment';
     if (isAuditor) return 'audit';
     return 'register';
-  }, [isAdmin, isRegistrador, isTecnico, isAuditor]);
+  }, [isAdmin, isCliente, isRegistrador, isTecnico, isAuditor]);
 
   const [activeTab, setActiveTab] = useState<TabType>(getDefaultTab());
 
@@ -174,11 +175,12 @@ const Index = () => {
 
   const canViewTab = useCallback((tab: TabType): boolean => {
     if (isAdmin) return true;
+    if (isCliente && tab === 'dashboard') return true;
     if (isRegistrador && (tab === 'register' || tab === 'delivery' || tab === 'extra')) return true;
     if (isTecnico && (tab === 'equipment' || tab === 'register' || tab === 'delivery' || tab === 'extra')) return true;
     if (isAuditor && (tab === 'audit' || tab === 'equipment' || tab === 'register' || tab === 'delivery' || tab === 'extra')) return true;
     return false;
-  }, [isAdmin, isRegistrador, isTecnico, isAuditor]);
+  }, [isAdmin, isCliente, isRegistrador, isTecnico, isAuditor]);
 
   // Loading state - after all hooks
   if (isLoading) {
@@ -205,7 +207,7 @@ const Index = () => {
       <Header subtitle={headerInfo.subtitle} />
 
       <main className="flex-1 flex flex-col overflow-auto main-content-with-nav">
-        {activeTab === 'dashboard' && isAdmin && (
+        {activeTab === 'dashboard' && (isAdmin || isCliente) && (
           <DashboardPanel
             companies={companies}
             projects={projects}

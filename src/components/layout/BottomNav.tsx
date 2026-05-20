@@ -8,8 +8,8 @@ interface BottomNavProps {
   onTabChange: (tab: TabType) => void;
 }
 
-const allTabs: { id: TabType; label: string; icon: React.ElementType; roles: ('admin' | 'registrador' | 'tecnico' | 'auditor')[] }[] = [
-  { id: "dashboard", label: "Dashboard", icon: BarChart3, roles: ['admin'] },
+const allTabs: { id: TabType; label: string; icon: React.ElementType; roles: ('admin' | 'registrador' | 'tecnico' | 'auditor' | 'cliente')[] }[] = [
+  { id: "dashboard", label: "Dashboard", icon: BarChart3, roles: ['admin', 'cliente'] },
   { id: "admin", label: "Admin", icon: Settings, roles: ['admin'] },
   { id: "users", label: "Usuarios", icon: Users, roles: ['admin'] },
   { id: "register", label: "Registro", icon: Car, roles: ['admin', 'registrador', 'tecnico', 'auditor'] },
